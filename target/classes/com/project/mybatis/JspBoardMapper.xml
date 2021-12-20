@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="com.project.mybatis.JspBoardMapper">
+
+	<select id="getArticleCount" resultType="int">
+		select count(*) from board
+	</select>
+	
+	<select id="getArticles" resultType="com.project.bean.BoardDataBean">
+		<![CDATA[
+			select * from (
+				select num,writer,email,subject,passwd,reg_date,ref,re_step,re_level,content,ip,readcount,rownum r from (
+					select * from board order by ref desc, re_step asc)
+				order by ref desc, re_step asc )
+			where r >= #{startRow} and r <= #{endRow}
+		]]>
+	</select>
+
+	<select id="maxNum" resultType="int">
+		select max(num) from board
+	</select>
+
+	<update id="stepUpdate">
+		update board set re_step=re_step+1 where ref= #{ref} and re_step> #{re_step}
+	</update>
+
+	<insert id="insertArticle">
+		insert into board(num,writer,email,subject,passwd,reg_date,ref,re_step,re_level,content,ip) 
+			values(board_seq.NEXTVAL,
+					#{writer},
+					#{email},
+					#{subject},
+					#{passwd},
+					#{reg_date},
+					#{ref},
+					#{re_step},
+					#{re_level},
+					#{content},
+					#{ip})
+	</insert>
+
+	<update id="readcountUpdate">
+		update board set readcount=readcount+1 where num = #{num}
+	</update>
+
+	<select id="getArticle" resultType="com.project.bean.BoardDataBean">
+		select * from board where num = #{num}
+	</select>
+	
+	<select id="passwdCheck" resultType="String">
+		select passwd from board where num = #{num}
+	</select>
+	
+	<update id="updateArticle">
+		update board set 
+			writer = #{writer},
+			email = #{email},
+			subject = #{subject},
+			passwd = #{passwd},
+			content = #{content}
+			where num = #{num}
+	</update>
+	
+	<delete id="deleteArticle">
+		delete from board where num = #{num}
+	</delete>
+	
+</mapper>    

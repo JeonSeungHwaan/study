@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="org.mvc.mybatis.MemberMapper">
+
+	<insert id="input">
+		insert into tbl_member(id, pw, name, birth)
+			values( #{id}, #{pw}, #{name}, #{birth} )
+	</insert>
+	
+	<update id="imgUpdate">
+		update tbl_member set img = #{img} where id = #{id}
+	</update>
+	
+	<select id="loginCheck" resultType="int">
+		select count(*) from tbl_member where id = #{id} and pw = #{pw} and status != '탈퇴'
+	</select>
+
+	<select id="idCheck" resultType="int">
+		select count(*) from tbl_member where id = #{id}
+	</select>
+
+	<select id="userInfo" resultType="org.mvc.bean.MemberDTO">
+		select * from tbl_member where id = #{id}
+	</select>
+	
+	<update id="statusChange">
+		update tbl_member set status = '탈퇴' where id = #{id}
+	</update>
+	
+	<update id="userUpdate">
+		update tbl_member set pw = #{pw}, name = #{name}, birth = #{birth} where id = #{id}
+	</update>
+	
+	<select id="memberCount" resultType="int">
+		select count(*) from tbl_member
+	</select>
+
+</mapper>
