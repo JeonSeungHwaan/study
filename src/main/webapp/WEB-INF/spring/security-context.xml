@@ -7,6 +7,8 @@
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
 	<bean id="customSuccess" class="com.security.bean.CustomLoginHandler" />
+	<!-- <bean id="customNoop" class="com.security.bean.CustomNoopEncoder" /> -->
+	<bean id="bcryptPasswordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
 
 	<security:http>
 		<security:intercept-url pattern="/security/all" access="permitAll" />
@@ -14,9 +16,11 @@
 		<security:intercept-url pattern="/security/admin" access="hasRole('ROLE_ADMIN')" />
 		
 		<security:form-login login-page="/security/login" authentication-success-handler-ref="customSuccess" />
-		<security:logout logout-url="/security/logout" invalidate-session="true" />
+		<security:logout logout-url="/security/logout" invalidate-session="true" delete-cookies="remember-me, JSESSIONID" />
 		
 		<security:access-denied-handler error-page="/security/error403" />
+		
+		<security:remember-me data-source-ref="dataSource"  token-validity-seconds="86400" />
 		
 		<!-- CSRF 설정 -->
 		<security:csrf disabled="true"/>
@@ -24,10 +28,24 @@
 
 	<security:authentication-manager>
 		<security:authentication-provider>
+		
+			<!-- 데이터베이스와 연동하여 사용자의 정보를 불러오고 확인 한 후 로그인처리를 함 -->
+			<security:jdbc-user-service data-source-ref="dataSource"
+				users-by-username-query="select id,pw,enabled from security_member where id = ?" 
+				authorities-by-username-query="select id,auth from security_auth where id = ?" />
+			
+			<!-- 패스워드를 저장할 용도로 만들어진 해시함수 / 특정 문자열을 암호화하고 암호화된 패스워드는 확인용도로만 쓰이며, 되돌릴 수 없다. -->
+			<security:password-encoder ref="bcryptPasswordEncoder" />
+			
+			<!-- <security:password-encoder ref="customNoop" /> -->
+			
+			<!-- 잘 안쓰이는 부분
 			<security:user-service>
 				<security:user name="member" password="{noop}1234" authorities="ROLE_MEMBER"/>
 				<security:user name="admin" password="{noop}1234" authorities="ROLE_MEMBER, ROLE_ADMIN"/>
 			</security:user-service>
+			 -->
+			 
 		</security:authentication-provider>
 	</security:authentication-manager>
 
